@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="./" />
+    <meta charset="utf-8" />
+    <title>ISM lab1</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="./1.js"></script>
+</head>
+
+<body style="background-color: #2a2a2a; color: white">
+    <div id="multiplexialCongruentialContainer" style="height: 370px; width: 40%; display: inline-block"></div>
+    <div id="macLarenMarsagliaContainer" style="height: 370px; width: 40%; display: inline-block"></div>
+    <div id="c1" style="width: 40%; display: inline-block"></div>
+    <div id="c2" style="width: 40%; display: inline-block"></div>
+
+    <script>
+        var chart = new CanvasJS.Chart("multiplexialCongruentialContainer", {
+            animationEnabled: true,
+            theme: "dark1", // "light1", "light2", "dark1", "dark2"
+            title: {
+                text: "Multiplexial Congruential Result"
+            },
+            axisY: {
+                title: "Amount of numbers"
+            },
+            data: [{
+                type: "column",
+                showInLegend: true,
+                legendMarkerColor: "grey",
+                legendText: "range",
+                dataPoints: multiplexialCongruentialNu.map((amount, i) => ({y: amount, label: `${i/10}-${(i+1)/10}`}))
+            }]
+        });
+        chart.render();
+        var chart1 = new CanvasJS.Chart("macLarenMarsagliaContainer", {
+            animationEnabled: true,
+            theme: "dark1", // "light1", "light2", "dark1", "dark2"
+            title: {
+                text: "MacLaren Marsaglia Result"
+            },
+            axisY: {
+                title: "Amount of numbers"
+            },
+            data: [{
+                type: "column",
+                showInLegend: true,
+                legendMarkerColor: "grey",
+                legendText: "range",
+                dataPoints: macLarenMarsagliaNu.map((amount, i) => ({y: amount, label: `${i/10}-${(i+1)/10}`}))
+            }]
+        });
+        chart1.render();
+        function insert(el, text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            el.appendChild(div);
+        }
+        insert(document.querySelector('#c1'),multiplexialCongruentialHiStr);
+        insert(document.querySelector('#c1'),multiplexialCongruentialKolmagorovStr);
+        
+        insert(document.querySelector('#c2'),macLarenMarsagliaHiStr);
+        insert(document.querySelector('#c2'),macLarenMarsagliaKolmagorovStr);
+    </script>
+</body>
+
+</html>

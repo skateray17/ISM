@@ -4,18 +4,12 @@ const K = 48;
 const M = 2 ** 31;
 const epsilon = 0.05;
 
-// If user.name === Katya - ignore
 // Quite bad solution, but lgtm
-const generatorPrototype = Object.getPrototypeOf(function*(){}()).__proto__;
-
-// If user.name === Katya - ignore
-generatorPrototype.getMultipleValues = function(n) {
+const generatorPrototype = Object.getPrototypeOf(function* () { }()).__proto__;
+generatorPrototype.getMultipleValues = function (n) {
     return new Array(n).fill().map(() => this.next().value);
 }
 
-/**
- * If user.name === Katya look into linearCongruentialGeneratorWithoutGenerator
- */
 function* linearCongruentialGenerator(a, betta, c, M) {
     while (true) {
         a = (a * betta + c) % M;
@@ -23,28 +17,10 @@ function* linearCongruentialGenerator(a, betta, c, M) {
     }
 }
 
-function linearCongruentialGeneratorWithoutGenerator(a, betta, c, M, n) {
-    const res = new Array(n);
-    for(let i = 0; i < n; i++) {
-        res[i] = a = (a * betta + c) % M;
-    }
-    return res;
-}
-
-/**
- * If user.name === Katya look into multiplexialCongruentialGeneratorWithoutGenerator
- */
 function* multiplexialCongruentialGenerator(a, betta, M) {
     yield* linearCongruentialGenerator(a, betta, 0, M);
 }
 
-function multiplexialCongruentialGeneratorWithoutGenerator(a, betta, M, n) {
-    return linearCongruentialGeneratorWithoutGenerator(a, betta, 0, M, n);
-}
-
-/**
- * If user.name === Katya look into macLarenMarsagliaGeneratorWithoutGenerator
- */
 function* macLarenMarsagliaGenerator(XGenerator, YGenerator, MY, k) {
     const V = XGenerator.getMultipleValues(k);
 
@@ -57,29 +33,7 @@ function* macLarenMarsagliaGenerator(XGenerator, YGenerator, MY, k) {
 }
 
 /**
- * 
- * @param {number[]} XGenerated should have length k+n
- * @param {number[]} YGenerated should have length n
- * @param {number} k 
- * @param {number} n 
- */
-function macLarenMarsagliaGeneratorWithoutGenerator(XGenerated, YGenerated, MY, k, n) {
-    const V = new Array(k);
-    const res = new Array(n);
-    for(let i = 0; i < k; i++) {
-        XGenerated[i];
-    }
-    for(let i = 0; i < n; i++){
-        const j = Math.floor(k * YGenerated[i] / MY);
-        res[i] = V[j];
-        V[j] = XGenerated[i + k];
-    }
-    return res;
-}
-
-/**
  * Magic function from https://ru.wikipedia.org/wiki/%D0%9A%D0%B2%D0%B0%D0%BD%D1%82%D0%B8%D0%BB%D0%B8_%D1%80%D0%B0%D1%81%D0%BF%D1%80%D0%B5%D0%B4%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F_%D1%85%D0%B8-%D0%BA%D0%B2%D0%B0%D0%B4%D1%80%D0%B0%D1%82
- * Better don't use it, but just take const from the table
  */
 function approximateHiSquared(alpha, n) {
     const d = alpha < 0.5 ?
@@ -124,18 +78,16 @@ function hiSquaredTest(values, M, epsilon, k = 20) {
     const hiSquared = nu.reduce((sum, nu_k) => sum + ((nu_k - p_k) ** 2) / p_k, 0);
     const delta = approximateHiSquared(1 - epsilon, k - 1);
     if (hiSquared < delta) {
-        console.log('Passed hi-squared test');
-        console.log(`${hiSquared} < ${delta}`);
+        return { nu, str: `Passed hi-squared test: ${hiSquared.toFixed(5)} < ${delta.toFixed(5)}` };
     } else {
-        console.log('Hi-squared test failed');
-        console.log(`${hiSquared} > ${delta}`);
+        return { nu, str: `Hi-squared test failed: ${hiSquared.toFixed(5)} > ${delta.toFixed(5)}` };
     }
 }
 
 function approximateKolmogorov(epsilon) {
     let res = 0;
-    for(let i = -1000; i <= 1000; i++){
-        res += (-1)**i * Math.exp(-2 * k ** 2 * epsilon ** 2)
+    for (let i = -1000; i <= 1000; i++) {
+        res += (-1) ** i * Math.exp(-2 * k ** 2 * epsilon ** 2)
     }
     return res;
 }
@@ -144,22 +96,29 @@ function kolmogorovTest(values, M, epsilon) {
     // To avoid sorting of original array
     let copiedValues = [...values];
     copiedValues.sort((a, b) => a - b);
-    const Dn = copiedValues.reduce((ac, val, i) => Math.max(ac, Math.abs(val / M - i / copiedValues.length)), 0) * 
+    const Dn = copiedValues.reduce((ac, val, i) => Math.max(ac, Math.abs(val / M - (i + 1) / copiedValues.length)), 0) *
         Math.sqrt(copiedValues.length);
-    console.log(Dn);
+    // sadly, but I took it from table :c
+    const Kolmagorov_Quantile = 1.36;
+    if (Dn < Kolmagorov_Quantile) {
+        return `Passed Kolmogorov Test: ${Dn.toFixed(2)} < ${Kolmagorov_Quantile.toFixed(2)}`;
+    } else {
+        return `Kolmagorov test failed: ${Dn.toFixed(5)} > ${Kolmagorov_Quantile.toFixed(5)}`;
+    }
 }
 
 const multiplexialCongruentialResult = multiplexialCongruentialGenerator(a0, betta, M).getMultipleValues(1000);
+const macLarenMarsagliaResult = macLarenMarsagliaGenerator(
+    linearCongruentialGenerator(a0, betta, 0, M),
+    linearCongruentialGenerator(a0 + 42, betta - 42, 42, M),
+    M, K
+).getMultipleValues(1000);
 
-const XGenerator = linearCongruentialGenerator(a0, betta, 0, M);
-const YGenerator = linearCongruentialGenerator(a0 + 42, betta - 42, 42, M);
-const macLarenMarsagliaResult = macLarenMarsagliaGenerator(XGenerator, YGenerator, M, K).getMultipleValues(1000);
 
-
-hiSquaredTest(macLarenMarsagliaResult, M, epsilon, 10);
-hiSquaredTest(multiplexialCongruentialResult, M, epsilon, 10);
-kolmogorovTest(multiplexialCongruentialResult, M);
-kolmogorovTest(macLarenMarsagliaResult, M);
+const { nu: macLarenMarsagliaNu, str: macLarenMarsagliaHiStr } = hiSquaredTest(macLarenMarsagliaResult, M, epsilon, 10);
+const { nu: multiplexialCongruentialNu, str: multiplexialCongruentialHiStr } = hiSquaredTest(multiplexialCongruentialResult, M, epsilon, 10);
+const multiplexialCongruentialKolmagorovStr = kolmogorovTest(multiplexialCongruentialResult, M, epsilon);
+const macLarenMarsagliaKolmagorovStr = kolmogorovTest(macLarenMarsagliaResult, M, epsilon);
 /**
  * DEPRECATED
  */
