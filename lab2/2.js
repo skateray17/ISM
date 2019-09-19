@@ -254,7 +254,6 @@ function hiSquaredTest(generator) {
         nu = new Array(10).fill(0);
         generator.result.forEach(el => nu[Math.min(9, el)]++);
     }
-    // const p_k = values.length / k;
     const hiSquared = nu.reduce((sum, nu_k, i) => {
         const p_k = (generator.distributionFunction(generator.isFinite || i !== nu.length - 1 ? i : Infinity) - generator.distributionFunction(i - 1)) * generator.result.length;
         console.log(nu_k, p_k);
