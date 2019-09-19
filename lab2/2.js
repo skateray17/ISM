@@ -83,15 +83,15 @@ function* reversedBinomialGenerator(n, p) {
     }
 }
 
-function* puassonGenerator(lambda) {
+function* puassonGenerator(torrent) {
     const randomGenerator = getRandomGenerator.next().value;
     while (true) {
-        let p = Math.exp(-lambda);
+        let p = Math.exp(-torrent);
         let x = 0;
         let r = randomGenerator.next().value - p;
         while (r > 0) {
             x++;
-            p = p * lambda / x;
+            p = p * torrent / x;
             r -= p;
         }
         yield x;
@@ -133,15 +133,15 @@ function reversedBinomialDistributionFunction(n, p) {
     }
 }
 
-function puassonDistributionFunction(lambda) {
+function puassonDistributionFunction(torrent) {
     return (x) => {
         if (x < 0) return 0;
         if (x === Infinity) return 1;
         let res = 0;
         for (let i = 0; i <= x; i++) {
-            res += Math.pow(lambda, i) / factorial(i);
+            res += Math.pow(torrent, i) / factorial(i);
         }
-        return res * Math.exp(-lambda);
+        return res * Math.exp(-torrent);
     }
 }
 
@@ -161,7 +161,13 @@ const DISTRIBUTION_FUNCTIONS = {
 const EXPECTED_VALUES = {
     [DISTRIBUTION_TYPES.BINOMIAL]: (n, p) => n * p,
     [DISTRIBUTION_TYPES.REVERSED_BINOMIAL]: (n, p) => n * (1 - p) / p,
-    [DISTRIBUTION_TYPES.PUASSON]: (lambda) => lambda,
+    [DISTRIBUTION_TYPES.PUASSON]: (torrent) => torrent,
+}
+
+const DISPERSIONS = {
+    [DISTRIBUTION_TYPES.BINOMIAL]: (n, p) => n * p * (1 - p),
+    [DISTRIBUTION_TYPES.REVERSED_BINOMIAL]: (n, p) => n * (1 - p) / p**2,
+    [DISTRIBUTION_TYPES.PUASSON]: (torrent) => torrent,
 }
 
 function isFiniteDistribution(type) {
@@ -177,30 +183,45 @@ function isFiniteDistribution(type) {
 const SKEWNESSES = {
     [DISTRIBUTION_TYPES.BINOMIAL]: (n, p) => (1 - 2 * p) / Math.sqrt(n * p * (1 - p)),
     [DISTRIBUTION_TYPES.REVERSED_BINOMIAL]: (n, p) => (2 - p) / Math.sqrt(n * (1 - p)),
-    [DISTRIBUTION_TYPES.PUASSON]: (lambda) => 1 / Math.sqrt(lambda),
+    [DISTRIBUTION_TYPES.PUASSON]: (torrent) => 1 / Math.sqrt(torrent),
 }
 
 const EXCESSES = {
     [DISTRIBUTION_TYPES.BINOMIAL]: (n, p) => (1 - 6 * p * (1 - p)) / (n * p * (1 - p)),
     [DISTRIBUTION_TYPES.REVERSED_BINOMIAL]: (n, p) => p * p / (n * (1 - p)) + 6 / n,
-    [DISTRIBUTION_TYPES.PUASSON]: (lambda) => 1 / lambda,
+    [DISTRIBUTION_TYPES.PUASSON]: (torrent) => 1 / torrent,
 }
 
 function createGenerator(generatorType, n, ...args) {
     const generator = GENERATORS[generatorType](...args);
+    const result = generator.getMultipleValues(n);
     return {
         generator,
         distributionFunction: DISTRIBUTION_FUNCTIONS[generatorType](...args),
-        expectedValue: EXPECTED_VALUES[generatorType](...args),
-        result: generator.getMultipleValues(n),
+        result,
         isFinite: isFiniteDistribution(generatorType),
+        expectedValue: EXPECTED_VALUES[generatorType](...args),
+        dispersion: DISPERSIONS[generatorType](...args),
         skewness: SKEWNESSES[generatorType](...args),
         excess: EXCESSES[generatorType](...args),
+        realExpectedValue: getExpectedValue(result),
+        realDispersion: getDispersion(result),
+        realSkewness: getSkewness(result),
+        realExcess: getExcess(result),
     }
 }
 
+function getExpectedValue(X){
+    return X.reduce((a, b) => a + b) / X.length;
+}
+
+function getDispersion(X) {
+    const xAv = getExpectedValue(X);
+    return X.reduce((sum, x) => (x - xAv) ** 2 + sum) / (X.length - 1);
+}
+
 function M(k, X) {
-    const xAv = X.reduce((a, b) => a + b) / X.length;
+    const xAv = getExpectedValue(X);
     return X.reduce((a, b) => a + Math.pow(b - xAv, k)) / X.length;
 }
 
