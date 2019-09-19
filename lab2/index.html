@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="./" />
+    <meta charset="utf-8" />
+    <title>ISM lab2</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="./2.js"></script>
+</head>
+
+<body style="background-color: #2a2a2a; color: white">
+    <style>
+        .chartContainer {
+            height: 350px;
+            width: 95%;
+            display: inline-block;
+        }
+    </style>
+    <script>
+        let k = 1;
+        function addChartToPage(generatorResult) {
+            const chartContainer = document.createElement('div');
+            chartContainer.id = `chartContainer${k}`;
+            chartContainer.classList.add('chartContainer');
+            let arr1 = [], arr2 = [];
+            generatorResult.result.forEach(el => arr1[el] = arr1[el] + 1 || 1);
+            for (let i = 0; i < arr1.length; i++) {
+                arr1[i] = arr1[i] || 0; //remove empty elements
+            }
+            arr1.forEach((_, i) => arr2[i] =
+                (generatorResult.distributionFunction(i) - generatorResult.distributionFunction(i - 1)) * generatorResult.result.length);
+            document.body.appendChild(chartContainer);
+            const chart = new CanvasJS.Chart(`chartContainer${k++}`, {
+                animationEnabled: true,
+                theme: 'dark1',
+                // TODO title, axises
+                axisY: {
+                    title: "Amount of numbers"
+                },
+                axisX: {
+                    minimum: 0,
+                    maximum: arr1.length - 1,
+                },
+                title: {
+                    text: generatorResult.name,
+                },
+                data: [
+                    {
+                        type: 'column',
+                        name: 'actual distribution',
+                        showInLegend: true,
+                        dataPoints: arr1.map((el, i) => ({ x: i, y: el })),
+                    },
+                    {
+                        type: 'spline',
+                        name: 'expected distribution',
+                        showInLegend: true,
+                        dataPoints: arr2.map((el, i) => ({ x: i, y: el })),
+                    },
+                ],
+            });
+            chart.render();
+        }
+        addChartToPage(binomialResult1);
+        addChartToPage(binomialResult2);
+        addChartToPage(reversedBinomialResult);
+        addChartToPage(puassonResult);
+    </script>
+</body>
+
+</html>

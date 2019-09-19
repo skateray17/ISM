@@ -192,10 +192,17 @@ const EXCESSES = {
     [DISTRIBUTION_TYPES.PUASSON]: (torrent) => 1 / torrent,
 }
 
+const NAMES = {
+    [DISTRIBUTION_TYPES.BINOMIAL]: 'Binomial',
+    [DISTRIBUTION_TYPES.REVERSED_BINOMIAL]: 'Reversed binomial',
+    [DISTRIBUTION_TYPES.PUASSON]: 'Puasson',
+}
+
 function createGenerator(generatorType, n, ...args) {
     const generator = GENERATORS[generatorType](...args);
     const result = generator.getMultipleValues(n);
     return {
+        name: NAMES[generatorType],
         generator,
         distributionFunction: DISTRIBUTION_FUNCTIONS[generatorType](...args),
         result,
