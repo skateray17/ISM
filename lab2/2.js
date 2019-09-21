@@ -44,8 +44,8 @@ generatorPrototype.getMultipleValues = function (n) {
 
 function* linearCongruentialGenerator(a, betta, c, M) {
     while (true) {
-        a = (a * betta + c) % M;
-        yield a / M;
+        a = (BigInt(a) * BigInt(betta) + BigInt(c)) % BigInt(M);
+        yield Number(a) / M;
     }
 }
 
