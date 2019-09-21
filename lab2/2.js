@@ -224,12 +224,12 @@ function getExpectedValue(X){
 
 function getDispersion(X) {
     const xAv = getExpectedValue(X);
-    return X.reduce((sum, x) => (x - xAv) ** 2 + sum) / (X.length - 1);
+    return X.reduce((sum, x) => (x - xAv) ** 2 + sum, 0) / (X.length - 1);
 }
 
 function M(k, X) {
     const xAv = getExpectedValue(X);
-    return X.reduce((a, b) => a + Math.pow(b - xAv, k)) / X.length;
+    return X.reduce((a, b) => a + Math.pow(b - xAv, k), 0) / X.length;
 }
 
 // http://www.machinelearning.ru/wiki/index.php?title=%D0%9A%D0%BE%D1%8D%D1%84%D1%84%D0%B8%D1%86%D0%B8%D0%B5%D0%BD%D1%82_%D0%B0%D1%81%D0%B8%D0%BC%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%B8
