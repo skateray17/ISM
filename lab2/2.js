@@ -101,7 +101,6 @@ function* puassonGenerator(torrent) {
 const factorial = (() => {
     const _m = [BigInt(1)];
     return function f(x) {
-        console.log(_m);
         return _m[x] ? _m[x] : _m[x] = f(x - 1) * BigInt(x);
     }
 })()
