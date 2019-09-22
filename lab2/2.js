@@ -99,14 +99,20 @@ function* puassonGenerator(torrent) {
 }
 
 const factorial = (() => {
-    const _m = [1];
+    const _m = [BigInt(1)];
     return function f(x) {
-        return _m[x] ? _m[x] : _m[x] = f(x - 1) * x;
+        console.log(_m);
+        return _m[x] ? _m[x] : _m[x] = f(x - 1) * BigInt(x);
     }
 })()
 
 function C(n, k) {
-    return factorial(n) / (factorial(k) * factorial(n - k));
+    if(k > n - k) return C(n, n - k);
+    let res = 1;
+    for(let i = 0; i < k; i++){
+        res *= (n - k + i + 1) / (k - i);
+    }
+    return res;
 }
 
 function binomialDistributionFunction(n, p) {
