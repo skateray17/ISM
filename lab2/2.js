@@ -246,18 +246,12 @@ function getExcess(X) {
 }
 
 function hiSquaredTest(generator) {
-    let nu;
-    if (generator.isFinite) {
-        nu = [];
-        generator.result.forEach(el => nu[el] = nu[el] + 1 || 1);
-    } else {
-        nu = new Array(10).fill(0);
-        generator.result.forEach(el => nu[Math.min(9, el)]++);
-    }
-    const hiSquared = nu.reduce((sum, nu_k, i) => {
-        const p_k = (generator.distributionFunction(generator.isFinite || i !== nu.length - 1 ? i : Infinity) - generator.distributionFunction(i - 1)) * generator.result.length;
-        console.log(nu_k, p_k);
-        return sum + ((nu_k - p_k) ** 2) / p_k;
+    const nu = [];
+    generator.result.forEach(el => nu[el] = nu[el] + 1 || 1);
+    const p_k = new Array(nu.length).fill().map((_, i) => (
+        generator.distributionFunction(generator.isFinite || i !== nu.length - 1 ? i : Infinity) - generator.distributionFunction(i - 1)) * generator.result.length)
+    const hiSquared = p_k.reduce((sum, p, i) => {
+        return sum + (((nu[i] || 0) - p) ** 2) / p;
     }, 0);
     const delta = approximateHiSquared(0.95, nu.length - 1);
     if (hiSquared < delta) {
