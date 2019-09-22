@@ -145,7 +145,7 @@ function puassonDistributionFunction(torrent) {
         if (x === Infinity) return 1;
         let res = 0;
         for (let i = 0; i <= x; i++) {
-            res += Math.pow(torrent, i) / factorial(i);
+            res += Math.pow(torrent, i) / Number(factorial(i));
         }
         return res * Math.exp(-torrent);
     }
