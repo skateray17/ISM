@@ -370,6 +370,21 @@ function hiSquaredTest(generator) {
   }
 }
 
+function kolmogorovTest(generator) {
+  // To avoid sorting of original array
+  let copiedValues = [...generator.result];
+  copiedValues.sort((a, b) => a - b);
+  const Dn = copiedValues.reduce((ac, val, i) => Math.max(ac, Math.abs(i / copiedValues.length - generator.distributionFunction(val))), 0) *
+      Math.sqrt(copiedValues.length);
+  // sadly, but I took it from table :c
+  const Kolmagorov_Quantile = 1.36;
+  if (Dn < Kolmagorov_Quantile) {
+      return `Passed Kolmogorov Test: ${Dn.toFixed(2)} < ${Kolmagorov_Quantile.toFixed(2)}`;
+  } else {
+      return `Kolmagorov test failed: ${Dn.toFixed(5)} > ${Kolmagorov_Quantile.toFixed(5)}`;
+  }
+}
+
 const N = 1000;
 const normalResult1 = createGenerator(DISTRIBUTION_TYPES.NORMAL, N, 0, 64);
 const normalResult2 = createGenerator(DISTRIBUTION_TYPES.NORMAL, N, 1, 9);
