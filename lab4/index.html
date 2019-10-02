@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base href="./" />
+  <meta charset="utf-8" />
+  <title>ISM lab4</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  <script src="./4.js"></script>
+</head>
+
+<body style="background-color: #2a2a2a; color: white">
+  <style>
+    .chartContainer {
+      height: 350px;
+      width: 95%;
+      display: inline-block;
+    }
+  </style>
+  <script>
+    let k = 1;
+    function addChartToPage(realRes, ...args) {
+      const chartContainer = document.createElement('div');
+      chartContainer.id = `chartContainer${k}`;
+      chartContainer.classList.add('chartContainer');
+      document.body.appendChild(chartContainer);
+      const arr = new Array(5).fill();
+      const chart = new CanvasJS.Chart(`chartContainer${k++}`, {
+        animationEnabled: true,
+        theme: 'dark1',
+        axisY: {
+          title: "Discrepancy"
+        },
+        title: {
+          text: args[0].toString(),
+        },
+        data: [
+          {
+            type: 'spline',
+            name: 'N',
+            showInLegend: true,
+            dataPoints: arr.map((el, i) => (args[1] = { N: 10 ** i }, { x: 10 ** i, y: integrateMonteCarlo(...args) - realRes })),
+          },
+        ],
+      });
+      chart.render();
+    }
+    addChartToPage(wolframResult1, (x) => 1 / (x ** 4 + 3 * x ** 2 + 17), {
+      N: 1000,
+    }, {
+      from: -Infinity,
+      to: Infinity,
+    });
+    addChartToPage(wolframResult2, (x, y) => (x * y ** 2 + 1) * Math.sin(x), {
+      N: 1000,
+    }, {
+      from: -3,
+      to: 3,
+    }, {
+      from: (x) => Math.abs(x) - 3,
+      to: (x) => 3 - Math.abs(x),
+    });
+  </script>
+</body>
+
+</html>
