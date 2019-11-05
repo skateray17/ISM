@@ -95,26 +95,26 @@ function getMonteCarloGenerator({ from, to }, args) {
     to = to(...args);
   }
   if(from === -Infinity && to === Infinity) {
-    const value = GENERATORS[DISTRIBUTION_TYPES.NORMAL](0, 1).next().value;
+    const value = GENERATORS[DISTRIBUTION_TYPES.NORMAL](0, 100).next().value;
     return {
       value,
-      density: DENSITIES[DISTRIBUTION_TYPES.NORMAL](0, 1)(value),
+      density: DENSITIES[DISTRIBUTION_TYPES.NORMAL](0, 100)(value),
     }
   }
   if(to === Infinity && Number.isFinite(from)) {
-    const value = GENERATORS[DISTRIBUTION_TYPES.HI_SQUARED](10).next().value;
+    const value = GENERATORS[DISTRIBUTION_TYPES.HI_SQUARED](4).next().value;
     return {
       //[0, +Inf] -> [from, +Inf]
       value: value + from,
-      density: DENSITIES[DISTRIBUTION_TYPES.HI_SQUARED](10)(value),
+      density: DENSITIES[DISTRIBUTION_TYPES.HI_SQUARED](4)(value),
     }
   }
   if(from === Infinity && Number.isFinite(to)) {
-    const value = GENERATORS[DISTRIBUTION_TYPES.HI_SQUARED](10).next().value;
+    const value = GENERATORS[DISTRIBUTION_TYPES.HI_SQUARED](4).next().value;
     return {
       //[0, +Inf] -> [-Inf, to]
       value: -value + to,
-      density: DENSITIES[DISTRIBUTION_TYPES.HI_SQUARED](10)(value),
+      density: DENSITIES[DISTRIBUTION_TYPES.HI_SQUARED](4)(value),
     }
   }
   if(Number.isFinite(from) && Number.isFinite(to)) {
@@ -127,13 +127,15 @@ function getMonteCarloGenerator({ from, to }, args) {
 }
 
 function integrateMonteCarlo(f, { N }, ...args) {
-  const ksi = [];
+  const ksi = new Array(N);
   for(let i = 0; i < N; i++) {
     const fArgs = args.reduce((ac, arg) => [...ac, getMonteCarloGenerator(arg, ac.map(e => e.value))], []);
-    ksi.push(f(...fArgs.map(e => e.value)) / fArgs.reduce((ac, e) => ac * e.density, 1));
+    ksi[i] = f(...fArgs.map(e => e.value)) / fArgs.reduce((ac, e) => ac * e.density, 1);
   }
   return getExpectedValue(ksi);
 }
 
 const wolframResult1 = Math.PI * Math.sqrt((2 * Math.sqrt(17) - 3) / 1003);
 const wolframResult2 = 8 * (5 + 3 * Math.sin(3) + 4 * Math.cos(3));
+const wolframResult3 = 2.07959;
+const wolframResult4 = 1;

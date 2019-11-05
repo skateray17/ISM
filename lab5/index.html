@@ -4,12 +4,12 @@
 <head>
   <base href="./" />
   <meta charset="utf-8" />
-  <title>ISM lab4</title>
+  <title>ISM lab5</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-  <script src="./4.js"></script>
+  <script src="./5.js"></script>
 </head>
 
 <body style="background-color: #2a2a2a; color: white">
@@ -22,12 +22,12 @@
   </style>
   <script>
     let k = 1;
-    function addChartToPage(realRes, ...args) {
+    (function addChartToPage(realRes, ...args) {
       const chartContainer = document.createElement('div');
       chartContainer.id = `chartContainer${k}`;
       chartContainer.classList.add('chartContainer');
       document.body.appendChild(chartContainer);
-      const arr = new Array(5).fill();
+      const arr = new Array(40).fill();
       const chart = new CanvasJS.Chart(`chartContainer${k++}`, {
         animationEnabled: true,
         theme: 'dark1',
@@ -35,40 +35,20 @@
           title: "Discrepancy"
         },
         title: {
-          text: args[0].toString(),
+          text: 'length of chain',
         },
         data: [
           {
             type: 'spline',
             name: 'N',
             showInLegend: true,
-            dataPoints: arr.map((el, i) => (args[1] = { N: 10 ** i }, { x: 10 ** i, y: integrateMonteCarlo(...args) - realRes })),
+            dataPoints: arr.map((el, i) => ({x: i, y: Math.max(...getDiscrepancy(A, solve(A, b, i), b).map(x => Math.abs(x)))})),
           },
         ],
       });
       chart.render();
-    }
-    addChartToPage(wolframResult1, (x) => 1 / (x ** 4 + 3 * x ** 2 + 17), {
-      N: 1000,
-    }, {
-      from: -Infinity,
-      to: Infinity,
-    });
-    addChartToPage(wolframResult2, (x, y) => (x * y ** 2 + 1) * Math.sin(x), {
-      N: 1000,
-    }, {
-      from: -3,
-      to: 3,
-    }, {
-      from: (x) => Math.abs(x) - 3,
-      to: (x) => 3 - Math.abs(x),
-    });
-    addChartToPage(wolframResult3, (x) => Math.exp(-(x**4)) * Math.sqrt(1 + x**2), {
-      N: 1000,
-    }, {
-      from: -Infinity,
-      to: Infinity,
-    });
+    })();
+    
   </script>
 </body>
 
