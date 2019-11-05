@@ -50,8 +50,8 @@ public class M {
   }
   
   public static void main(String[] args) {
-    double[] mcl = MCG(68921, 68921, 2147483648L, 1000);
-    double[] mlmg = MLMG(MCG(68921, 68921, 2147483648L, 1048), MCG(68921, 68921, 2147483648L, 1000), 48, 1000);
+    double[] mcl = MCG(16387, 16387, 2147483648L, 1000);
+    double[] mlmg = MLMG(MCG(16387, 16387, 2147483648L, 1048), MCG(16387, 16387, 2147483648L, 1000), 48, 1000);
     System.out.println(hiSquared(mcl));
     System.out.println(hiSquared(mlmg));
     System.out.println(KT(mcl));
