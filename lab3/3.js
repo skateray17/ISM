@@ -120,7 +120,7 @@ const getRandomGenerator = (function* () {
   }
 })();
 
-const DISTRIBUTION_TYPES = {
+const DISTRIBUTION_TYPES = Object.freeze({
   NORMAL: 1,
   HI_SQUARED: 2,
   LAPLAS: 3,
@@ -128,7 +128,8 @@ const DISTRIBUTION_TYPES = {
   EXPONENTIAL: 5,
   NORMAL_BOX_MULLER: 6,
   MIXTURE: 7,
-}
+  KOSHI: 8,
+});
 
 function* normalGenerator(m = 0, sSquared = 1, n = 64) {
   const generatorsArray = getRandomGenerator.getMultipleValues(n);
@@ -253,6 +254,21 @@ function mixtureDispersion() {
   return mixtureSecondStartMoment(...arguments) - mixtureExpectedValue(...arguments) ** 2;
 }
 
+function* koshiGenerator(mu, lambda) {
+  const generator = getRandomGenerator.next().value;
+  while (true) {
+    yield mu + lambda * Math.tan(2 * Math.PI * generator.next().value);
+  }
+}
+
+function koshiDistributionFunction(mu, lambda) {
+  return x => {
+    if (x === -Infinity) return 0;
+    if (x === Infinity) return 1;
+    return 1 / 2 + 1 / Math.PI * Math.atan((x - mu) / lambda);
+  }
+}
+
 const GENERATORS = {
   [DISTRIBUTION_TYPES.NORMAL]: normalGenerator,
   [DISTRIBUTION_TYPES.HI_SQUARED]: hiSquaredGenerator,
@@ -261,6 +277,7 @@ const GENERATORS = {
   [DISTRIBUTION_TYPES.EXPONENTIAL]: exponentialGenerator,
   [DISTRIBUTION_TYPES.NORMAL_BOX_MULLER]: normalBoxMullerGenerator,
   [DISTRIBUTION_TYPES.MIXTURE]: mixtureGenerator,
+  [DISTRIBUTION_TYPES.KOSHI]: koshiGenerator,
 }
 
 const DISTRIBUTION_FUNCTIONS = {
@@ -271,6 +288,7 @@ const DISTRIBUTION_FUNCTIONS = {
   [DISTRIBUTION_TYPES.EXPONENTIAL]: exponentialDistributionFunction,
   [DISTRIBUTION_TYPES.NORMAL_BOX_MULLER]: normalDistributionFunction,
   [DISTRIBUTION_TYPES.MIXTURE]: mixtureDistributionFunction,
+  [DISTRIBUTION_TYPES.KOSHI]: koshiGenerator,
 }
 
 const SECOND_START_MOMENTS = {
@@ -281,6 +299,7 @@ const SECOND_START_MOMENTS = {
   [DISTRIBUTION_TYPES.EXPONENTIAL]: (lambda) => 2 / lambda ** 2,
   [DISTRIBUTION_TYPES.NORMAL_BOX_MULLER]: (m, sSquared) => m ** 2 + sSquared,
   [DISTRIBUTION_TYPES.MIXTURE]: mixtureSecondStartMoment,
+  [DISTRIBUTION_TYPES.KOSHI]: () => NaN,
 }
 
 const EXPECTED_VALUES = {
@@ -291,6 +310,7 @@ const EXPECTED_VALUES = {
   [DISTRIBUTION_TYPES.EXPONENTIAL]: (lambda) => 1 / lambda,
   [DISTRIBUTION_TYPES.NORMAL_BOX_MULLER]: (m) => m,
   [DISTRIBUTION_TYPES.MIXTURE]: mixtureExpectedValue,
+  [DISTRIBUTION_TYPES.KOSHI]: () => NaN,
 }
 
 const DISPERSIONS = {
@@ -301,6 +321,7 @@ const DISPERSIONS = {
   [DISTRIBUTION_TYPES.EXPONENTIAL]: (lambda) => 1 / lambda ** 2,
   [DISTRIBUTION_TYPES.NORMAL_BOX_MULLER]: (_, sSquared) => sSquared,
   [DISTRIBUTION_TYPES.MIXTURE]: mixtureDispersion,
+  [DISTRIBUTION_TYPES.KOSHI]: () => Infinity,
 }
 
 const NAMES = {
@@ -311,6 +332,7 @@ const NAMES = {
   [DISTRIBUTION_TYPES.EXPONENTIAL]: 'Exponential distribution',
   [DISTRIBUTION_TYPES.NORMAL_BOX_MULLER]: 'Normal Box-Muller distribution',
   [DISTRIBUTION_TYPES.MIXTURE]: 'Mixture of distributions',
+  [DISTRIBUTION_TYPES.KOSHI]: 'Koshi distibution',
 }
 
 
